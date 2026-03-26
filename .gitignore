@@ -1,0 +1,10 @@
+#no virtual environment
+venv/
+#no auto-generated compiled files created by python when code is run
+__pycache__/
+#no database data
+*.db
+#no copyrighted book files
+books/
+#no test outputs from renderer
+*.png
