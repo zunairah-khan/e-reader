@@ -27,3 +27,7 @@ pip install -r requirements.txt
 
 ## Status
 WIP — hardware not yet arrived.
+
+## Development Process
+Set up folder structure
+progress.py - for saving
