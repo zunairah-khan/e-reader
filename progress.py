@@ -29,9 +29,9 @@ def save(book,page,total_pages):
     Saves current page and total pages for a book"""
     conn = sqlite3.connect(DB) 
     conn.execute( 
-        'INSERT OR REPLACE INTO progress VALUES (?,?,?)'
-        (book,page,total_pages) #variables passed separately as tuples to avoid security vulnerabilities that come with putting variables directly into SQL strings.
-    )
+        'INSERT OR REPLACE INTO progress VALUES (?,?,?)',
+        (book,page,total_pages,) 
+    ) #variables passed separately as tuples to avoid security vulnerabilities that come with putting variables directly into SQL strings.
     conn.commit()
     conn.close()
 
