@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>E-Reader Library</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: monospace; max-width: 600px; margin: 40px auto; padding: 0 20px; background: #111; color: #eee; }
+    h1 { border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .book { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; }
+    .book-info { flex: 1; }
+    .book-name { font-size: 16px; }
+    .progress-bar { height: 4px; background: #333; margin-top: 6px; border-radius: 2px; }
+    .progress-fill { height: 4px; background: #0f0; border-radius: 2px; }
+    .pct { font-size: 12px; color: #888; margin-top: 4px; }
+    .del { color: #f55; text-decoration: none; font-size: 12px; margin-left: 16px; }
+    .upload-area { margin-top: 30px; border: 1px dashed #444; padding: 20px; border-radius: 4px; }
+    input[type=file] { color: #eee; }
+    button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-family: monospace; font-size: 14px; margin-top: 10px; }
+    button:hover { background: #0c0; }
+  </style>
+</head>
+<body>
+  <h1>// E-READER LIBRARY</h1>
+
+  {% if library %}
+    {% for book in library %}
+    <div class="book">
+      <div class="book-info">
+        <div class="book-name">{{ book.name }}</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ book.pct }}%"></div>
+        </div>
+        <div class="pct">{{ book.pct }}% complete</div>
+      </div>
+      <a class="del" href="/delete/{{ book.file }}">[remove]</a>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p style="color:#555">No books yet. Upload one below.</p>
+  {% endif %}
+
+  <div class="upload-area">
+    <form method="post" action="/upload" enctype="multipart/form-data">
+      <div>Upload EPUB</div>
+      <input type="file" name="book" accept=".epub"><br>
+      <button type="submit">[ UPLOAD ]</button>
+    </form>
+  </div>
+</body>
+</html>
