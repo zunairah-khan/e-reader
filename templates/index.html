@@ -52,5 +52,16 @@
       <button type="submit">Upload</button>
     </form>
   </div>
+
+  <div class="upload-area">
+  <form method="post" action="/upload-screensaver" enctype="multipart/form-data">
+    <div>Screensaver Image</div>
+    <p style="color:#888; font-size:12px; margin: 4px 0">
+      Displayed when device powers off. Will be converted to black and white.
+    </p>
+    <input type="file" name="screensaver" accept=".png,.jpg,.jpeg,.bmp"><br>
+    <button type="submit">[ UPLOAD SCREENSAVER ]</button>
+  </form>
+</div>
 </body>
 </html>
