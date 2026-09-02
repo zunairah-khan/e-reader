@@ -417,13 +417,12 @@ if __name__ == '__main__':
 
     if not books:
         print('No EPUBs found in books/ folder')
-        print('Download one from gutenberg.org and place it in books/')
     else:
         book_path = os.path.join(BOOKS_DIR, books[0])
         print(f'Testing with: {books[0]}')
         print('---')
 
-        # Test 1 — extraction
+        # Test 1 — extraction only
         print('Testing extract_text...')
         text = extract_text(book_path)
         print(f'Total characters extracted: {len(text)}')
@@ -431,40 +430,22 @@ if __name__ == '__main__':
         print(text[:500])
         print('---')
 
-        # Test 2 — pagination with caching
-        print('Testing get_pages...')
-        print('First open will paginate — subsequent opens load from cache...')
-        pages = get_pages(book_path)
-        print(f'Total pages: {len(pages)}')
-        print('---')
-        print('First page lines:')
-        for line in pages[0]:
-            print(repr(line))
-        print('---')
-
-        # Test 3 — page rendering
-        print('Testing render_page...')
-        img = render_page(pages[0], 0, len(pages))
-        img.save('test_page.png')
-        print('Saved test_page.png')
-
-        # Test 4 — home screen
+        # Test 2 — home screen only (no pagination needed)
         print('Testing render_home...')
         img = render_home(selected_index=0, battery_pct=75)
         img.save('test_home.png')
         print('Saved test_home.png')
 
-        # Test 5 — about screen
+        # Test 3 — about screen
         print('Testing render_about...')
         img = render_about()
         img.save('test_about.png')
         print('Saved test_about.png')
 
-        # Test 6 — shutdown screen
+        # Test 4 — shutdown screen
         print('Testing render_shutdown_screen...')
         img = render_shutdown_screen()
         img.save('test_shutdown.png')
         print('Saved test_shutdown.png')
 
-        print('---')
-        print('All tests done. Open the PNG files to check layout.')
+        print('All done.')

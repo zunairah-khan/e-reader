@@ -8,3 +8,5 @@ __pycache__/
 books/
 #no test outputs from renderer
 *.png
+#no cached pages from renderer
+*_pages.json
