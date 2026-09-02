@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from progress import get_completion, init_db
 
 # ── Display dimensions ──────────────────────────────────
-W, H = 648, 480
+W, H = 480, 648  # portrait — width x height
 
 # ── Paths ───────────────────────────────────────────────
 BASE_DIR  = os.path.dirname(__file__)
@@ -16,8 +16,8 @@ BOOKS_DIR = os.path.join(BASE_DIR, 'books')
 # ── Margins ─────────────────────────────────────────────
 MARGIN_TOP    = 50
 MARGIN_BOTTOM = 40
-MARGIN_LEFT   = 36
-MARGIN_RIGHT  = 36
+MARGIN_LEFT   = 30
+MARGIN_RIGHT  = 30
 LINE_SPACING  = 34
 MAX_LINES     = (H - MARGIN_TOP - MARGIN_BOTTOM) // LINE_SPACING
 
@@ -405,6 +405,16 @@ def render_shutdown_screen():
 
     return img
 
+
+# ══════════════════════════════════════════════════════════
+# ROTATION FUNCTION
+# ══════════════════════════════════════════════════════════
+def prepare_for_display(img):
+    """
+    Rotates image 90 degrees for portrait display orientation.
+    Call this on any image before sending to the e-ink screen.
+    """
+    return img.rotate(90, expand=True)
 
 # ══════════════════════════════════════════════════════════
 # TESTING

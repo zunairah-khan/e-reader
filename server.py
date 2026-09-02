@@ -75,23 +75,20 @@ def upload_screensaver():
     f = request.files.get('screensaver')
     if f and f.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
 
-        # Open and convert to black and white
         img = Image.open(f).convert('1')
 
-        # Resize maintaining aspect ratio to fit within display dimensions
-        # thumbnail() never stretches or squashes — it only shrinks to fit
-        img.thumbnail((648, 480), Image.LANCZOS)
+        # Resize to fit portrait display maintaining aspect ratio
+        img.thumbnail((480, 648), Image.LANCZOS)
 
-        # Create blank white canvas at exact display resolution
-        canvas = Image.new('1', (648, 480), 255)
-
-        # Centre the resized image on the canvas
-        # Equal margins on left/right and top/bottom
-        x = (648 - img.width)  // 2
-        y = (480 - img.height) // 2
+        # Centre on portrait canvas
+        canvas = Image.new('1', (480, 648), 255)
+        x = (480 - img.width)  // 2
+        y = (648 - img.height) // 2
         canvas.paste(img, (x, y))
 
-        # Save processed screensaver
+        # Rotate for display
+        canvas = canvas.rotate(90, expand=True)
+
         canvas.save(os.path.join(IMAGES_DIR, 'screensaver.png'))
 
     return redirect(url_for('index'))
