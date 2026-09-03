@@ -44,9 +44,9 @@ def load_font(name, size):
     return ImageFont.load_default()
 
 FONT_BODY    = load_font('LiberationSerif-Regular.ttf', 18)
-FONT_UI      = load_font('LiberationSans-Regular.ttf', 13)
-FONT_UI_BOLD = load_font('LiberationSans-Bold.ttf', 15)
-FONT_TOPBAR  = load_font('LiberationSans-Bold.ttf', 20)
+FONT_UI      = load_font('LiberationSans-Regular.ttf', 15)
+FONT_UI_BOLD = load_font('LiberationSans-Bold.ttf', 17)
+FONT_TOPBAR  = load_font('LiberationSans-Bold.ttf', 22)
 
 
 # ══════════════════════════════════════════════════════════
