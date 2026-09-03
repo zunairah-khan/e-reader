@@ -23,13 +23,27 @@ MAX_LINES     = (H - MARGIN_TOP - MARGIN_BOTTOM) // LINE_SPACING
 
 # ── Fonts ───────────────────────────────────────────────
 def load_font(name, size):
-    """Try to load a font, fall back to default if not found."""
+    # Try the name directly first (works on Pi with Liberation fonts)
     try:
         return ImageFont.truetype(name, size)
     except:
-        return ImageFont.load_default()
+        pass
+    # Fallback to Windows fonts for laptop testing
+    windows_fonts = {
+        'LiberationSerif-Regular.ttf': 'georgia.ttf',
+        'LiberationSerif-Bold.ttf':    'georgiab.ttf',
+        'LiberationSans-Regular.ttf':  'arial.ttf',
+        'LiberationSans-Bold.ttf':     'arialbd.ttf',
+    }
+    fallback = windows_fonts.get(name)
+    if fallback:
+        try:
+            return ImageFont.truetype(f'C:/Windows/Fonts/{fallback}', size)
+        except:
+            pass
+    return ImageFont.load_default()
 
-FONT_BODY    = load_font('LiberationSerif-Regular.ttf', 22)
+FONT_BODY    = load_font('LiberationSerif-Regular.ttf', 18)
 FONT_UI      = load_font('LiberationSans-Regular.ttf', 13)
 FONT_UI_BOLD = load_font('LiberationSans-Bold.ttf', 15)
 FONT_TOPBAR  = load_font('LiberationSans-Bold.ttf', 20)
@@ -432,30 +446,25 @@ if __name__ == '__main__':
         print(f'Testing with: {books[0]}')
         print('---')
 
-        # Test 1 — extraction only
+        # Test extraction
         print('Testing extract_text...')
+        import time
+        t = time.time()
         text = extract_text(book_path)
-        print(f'Total characters extracted: {len(text)}')
-        print('First 500 characters:')
-        print(text[:500])
+        print(f'Extraction took: {time.time() - t:.2f}s')
+        print(f'Total characters: {len(text)}')
         print('---')
 
-        # Test 2 — home screen only (no pagination needed)
-        print('Testing render_home...')
-        img = render_home(selected_index=0, battery_pct=75)
-        img.save('test_home.png')
-        print('Saved test_home.png')
+        # Test pagination with timing
+        print('Testing paginate...')
+        t = time.time()
+        pages = paginate(book_path)
+        print(f'Pagination took: {time.time() - t:.2f}s')
+        print(f'Total pages: {len(pages)}')
+        print('---')
 
-        # Test 3 — about screen
-        print('Testing render_about...')
-        img = render_about()
-        img.save('test_about.png')
-        print('Saved test_about.png')
-
-        # Test 4 — shutdown screen
-        print('Testing render_shutdown_screen...')
-        img = render_shutdown_screen()
-        img.save('test_shutdown.png')
-        print('Saved test_shutdown.png')
-
-        print('All done.')
+        # Show first page as PNG
+        print('Rendering first page...')
+        img = render_page(pages[60], 0, len(pages))
+        img.save('test_page.png')
+        print('Saved test_page.png — open to check layout')
