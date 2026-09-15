@@ -1,8 +1,8 @@
 import os
+import re
 import json
 import ebooklib
 from ebooklib import epub
-from bs4 import BeautifulSoup
 from PIL import Image, ImageDraw, ImageFont
 from progress import get_completion, init_db
 
@@ -21,27 +21,31 @@ MARGIN_RIGHT  = 30
 LINE_SPACING  = 34
 MAX_LINES     = (H - MARGIN_TOP - MARGIN_BOTTOM) // LINE_SPACING
 
+# ── Characters per line — adjust to match font size ─────
+CHARS_PER_LINE = 45
+
 # ── Fonts ───────────────────────────────────────────────
 def load_font(name, size):
-    # Try the name directly first (works on Pi with Liberation fonts)
-    try:
-        return ImageFont.truetype(name, size)
-    except:
-        pass
-    # Fallback to Windows fonts for laptop testing
-    windows_fonts = {
-        'LiberationSerif-Regular.ttf': 'georgia.ttf',
-        'LiberationSerif-Bold.ttf':    'georgiab.ttf',
-        'LiberationSans-Regular.ttf':  'arial.ttf',
-        'LiberationSans-Bold.ttf':     'arialbd.ttf',
-    }
-    fallback = windows_fonts.get(name)
-    if fallback:
+    """Load font — detects OS and uses appropriate font path."""
+    if os.name == 'nt':  # Windows
+        windows_fonts = {
+            'LiberationSerif-Regular.ttf': 'georgia.ttf',
+            'LiberationSerif-Bold.ttf':    'georgiab.ttf',
+            'LiberationSans-Regular.ttf':  'arial.ttf',
+            'LiberationSans-Bold.ttf':     'arialbd.ttf',
+        }
+        fallback = windows_fonts.get(name, 'arial.ttf')
         try:
             return ImageFont.truetype(f'C:/Windows/Fonts/{fallback}', size)
-        except:
-            pass
-    return ImageFont.load_default()
+        except Exception as e:
+            print(f'Font error: {e}')
+            return ImageFont.load_default()
+    else:  # Linux / Pi
+        try:
+            return ImageFont.truetype(name, size)
+        except Exception as e:
+            print(f'Font error: {e}')
+            return ImageFont.load_default()
 
 FONT_BODY    = load_font('LiberationSerif-Regular.ttf', 18)
 FONT_UI      = load_font('LiberationSans-Regular.ttf', 15)
@@ -53,9 +57,24 @@ FONT_TOPBAR  = load_font('LiberationSans-Bold.ttf', 22)
 # EPUB PARSING
 # ══════════════════════════════════════════════════════════
 
+def strip_html(content):
+    """Strip HTML tags using regex — much faster than BeautifulSoup on Pi Zero."""
+    text = content.decode('utf-8', errors='ignore')
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'&#13;', ' ', text)
+    text = re.sub(r'&#\d+;', ' ', text)
+    text = re.sub(r'&nbsp;', ' ', text)
+    text = re.sub(r'&amp;', '&', text)
+    text = re.sub(r'&lt;', '<', text)
+    text = re.sub(r'&gt;', '>', text)
+    text = re.sub(r'&quot;', '"', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
 def extract_text(epub_path):
     """
     Opens an EPUB and extracts clean plain text from every chapter.
+    Uses regex instead of BeautifulSoup for speed on Pi Zero.
     Skips non-content documents like copyright pages and TOC.
     Returns one large string of the entire book's text.
     """
@@ -63,23 +82,20 @@ def extract_text(epub_path):
     chapters = []
 
     for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
-        soup = BeautifulSoup(item.get_content(), 'html.parser')
-        text = soup.get_text()
+        text = strip_html(item.get_content())
 
-        # Skip very short documents
+        # Skip very short documents — likely metadata, TOC, blank pages
         if len(text.strip()) < 300:
             continue
 
-        # Clean up excessive blank lines
+        # Skip if it looks like a table of contents
+        # TOC has many short lines but very little actual text
         lines = [l.strip() for l in text.splitlines() if l.strip()]
         cleaned = '\n'.join(lines)
-
-        # Skip if it looks like a table of contents
-        # TOC has many short lines but little actual text
         if cleaned.count('\n') > 50 and len(cleaned) < 2000:
             continue
 
-        chapters.append(cleaned)
+        chapters.append(text)
 
     return '\n\n'.join(chapters)
 
@@ -88,19 +104,18 @@ def extract_text(epub_path):
 # PAGINATION
 # ══════════════════════════════════════════════════════════
 
-def wrap_text(draw, text, font, max_width):
+def wrap_text_by_chars(text):
     """
-    Splits a string of text into lines that fit within max_width pixels.
-    Works word by word — measures actual pixel width before deciding
-    whether a word fits on the current line.
+    Wraps text by character count instead of pixel width.
+    Much faster than textlength() on Pi Zero.
+    Adjust CHARS_PER_LINE at the top of this file to fit your font.
     """
     words = text.split()
-    lines = []
-    line  = ''
+    lines, line = [], ''
 
     for word in words:
         test = line + ' ' + word if line else word
-        if draw.textlength(test, font=font) <= max_width:
+        if len(test) <= CHARS_PER_LINE:
             line = test
         else:
             if line:
@@ -115,14 +130,11 @@ def wrap_text(draw, text, font, max_width):
 
 def paginate(epub_path):
     """
-    Splits the entire book into screen sized pages.
-    Each page is a list of text lines that fit on the 648x480 display.
+    Splits the entire book into screen sized pages using
+    character count wrapping for speed on Pi Zero.
+    Each page is a list of text lines that fit on the display.
     Returns a list of pages.
     """
-    dummy_img = Image.new('1', (W, H), 255)
-    draw      = ImageDraw.Draw(dummy_img)
-    max_width = W - MARGIN_LEFT - MARGIN_RIGHT
-
     full_text  = extract_text(epub_path)
     paragraphs = full_text.split('\n\n')
 
@@ -133,8 +145,9 @@ def paginate(epub_path):
         if not paragraph.strip():
             continue
 
-        lines = wrap_text(draw, paragraph, FONT_BODY, max_width)
+        lines = wrap_text_by_chars(paragraph)
 
+        # Add blank line between paragraphs for readability
         if current_page:
             lines = [''] + lines
 
@@ -145,6 +158,7 @@ def paginate(epub_path):
                 pages.append(current_page)
                 current_page = []
 
+    # Don't lose the final partial page
     if current_page:
         pages.append(current_page)
 
@@ -246,8 +260,8 @@ def render_home(selected_index=0, battery_pct=75):
     # Battery percentage
     pct_text = f'{battery_pct}%'
     pct_w    = draw.textlength(pct_text, font=FONT_UI)
-    draw.text((570 - pct_w, 16), pct_text, font=FONT_UI, fill=255)
-    draw_battery(draw, battery_pct, 576, 14)
+    draw.text((W - pct_w - 54, 16), pct_text, font=FONT_UI, fill=255)
+    draw_battery(draw, battery_pct, W - 50, 14)
 
     # ── Book rows ──────────────────────────────────────
     ROW_H   = 72
@@ -423,6 +437,7 @@ def render_shutdown_screen():
 # ══════════════════════════════════════════════════════════
 # ROTATION FUNCTION
 # ══════════════════════════════════════════════════════════
+
 def prepare_for_display(img):
     """
     Rotates image 90 degrees for portrait display orientation.
@@ -430,11 +445,13 @@ def prepare_for_display(img):
     """
     return img.rotate(90, expand=True)
 
+
 # ══════════════════════════════════════════════════════════
 # TESTING
 # ══════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
+    import time
     init_db()
 
     books = sorted([f for f in os.listdir(BOOKS_DIR) if f.endswith('.epub')])
@@ -448,14 +465,15 @@ if __name__ == '__main__':
 
         # Test extraction
         print('Testing extract_text...')
-        import time
         t = time.time()
         text = extract_text(book_path)
         print(f'Extraction took: {time.time() - t:.2f}s')
         print(f'Total characters: {len(text)}')
+        print('First 300 characters:')
+        print(text[:300])
         print('---')
 
-        # Test pagination with timing
+        # Test pagination
         print('Testing paginate...')
         t = time.time()
         pages = paginate(book_path)
@@ -463,8 +481,16 @@ if __name__ == '__main__':
         print(f'Total pages: {len(pages)}')
         print('---')
 
-        # Show first page as PNG
+        # Render first page as PNG
         print('Rendering first page...')
-        img = render_page(pages[60], 0, len(pages))
+        img = render_page(pages[10], 0, len(pages))
         img.save('test_page.png')
-        print('Saved test_page.png — open to check layout')
+        print('Saved test_page.png')
+
+        # Render home screen as PNG
+        print('Rendering home screen...')
+        img = render_home(selected_index=0, battery_pct=75)
+        img.save('test_home.png')
+        print('Saved test_home.png')
+
+        print('All done — open PNG files to check layout.')
