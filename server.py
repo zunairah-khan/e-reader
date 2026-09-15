@@ -58,14 +58,17 @@ def upload():
 
 # ── DELETE ROUTE ───────────────────────────────────────────────────────────────
 
-@app.route('/delete/<filename>') #variable filename route
+@app.route('/delete/<filename>')
 def delete_book(filename):
     path = os.path.join(BOOKS_DIR, filename)
-    # check file exists before trying to delete
     if os.path.exists(path):
-        os.remove(path)          #deletes epub file from books folder
-        delete(filename)         #delete function from progress.py to remove the books progress record from the db
-    return redirect(url_for('index')) #sends browser back to the homepage
+        os.remove(path)
+        delete(filename)
+        # Delete pagination cache if it exists
+        cache_path = path.replace('.epub', '_pages.json')
+        if os.path.exists(cache_path):
+            os.remove(cache_path)
+    return redirect(url_for('index'))
 
 
 # ── SCREENSAVER UPLOAD ROUTE ───────────────────────────────────────────────────
