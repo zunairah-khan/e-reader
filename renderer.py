@@ -22,7 +22,7 @@ LINE_SPACING  = 34
 MAX_LINES     = (H - MARGIN_TOP - MARGIN_BOTTOM) // LINE_SPACING
 
 # ── Characters per line — adjust to match font size ─────
-CHARS_PER_LINE = 45
+CHARS_PER_LINE = 70
 
 # ── Fonts ───────────────────────────────────────────────
 def load_font(name, size):
