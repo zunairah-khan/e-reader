@@ -216,6 +216,7 @@ def handle_menu_button():
     Short press — back to home.
     Long press (2s) — shutdown.
     """
+    global state
     press_time = time.time()
 
     # Wait while button is held
@@ -229,7 +230,7 @@ def handle_menu_button():
     if state == STATE_READING:
         reading_menu()
     elif state == STATE_ABOUT:
-        global state
+        
         state = STATE_HOME
         show_home()
 
