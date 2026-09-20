@@ -20,10 +20,10 @@ from renderer import (
 )
 
 # ── GPIO Button pins ────────────────────────────────────
-BTN_UP     = 29
-BTN_DOWN   = 31
-BTN_SELECT = 33
-BTN_MENU   = 35
+BTN_UP     = 5
+BTN_DOWN   = 6
+BTN_SELECT = 13
+BTN_MENU   = 19
 
 # ── State ───────────────────────────────────────────────
 # Tracks what the device is currently showing
