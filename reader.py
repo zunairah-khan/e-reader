@@ -130,6 +130,7 @@ def home_down():
     books = get_books()
     total = len(books) + 1  # books + About only
     selected_index = (selected_index + 1) % total
+    print(f'Books: {len(books)}, Total: {total}, Selected: {selected_index}')
     show_home()
 
 def home_up():
