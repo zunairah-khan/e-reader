@@ -460,7 +460,7 @@ def render_about():
 
     # ── IP address — rounded box ────────────────────────
     y += 8
-    ip_text = '192.168.1.118:5000'
+    ip_text = 'http://192.168.1.33:5000'
     ip_w    = draw.textlength(ip_text, font=FONT_UI_BOLD)
     box_x   = (W - ip_w - 24) // 2
     draw.rounded_rectangle([box_x, y, box_x + ip_w + 24, y + 28],
