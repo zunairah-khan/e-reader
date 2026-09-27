@@ -328,7 +328,7 @@ def render_home(selected_index=0, battery_pct=75):
             if fill_w > 0:
                 draw.rounded_rectangle(
                     [bar_x, bar_y, bar_x + fill_w, bar_y + bar_h],
-                    radius=3, fill=255
+                    radius=3, fill=0
                 )
         else:
             # Track — light grey with black outline
