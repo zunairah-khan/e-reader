@@ -89,10 +89,11 @@ def show_home():
 
 
 def show_current_page():
-    """Render and display the current book page."""
+    battery = get_battery()
     img = render_page(pages[current_page],
                       current_page,
-                      total_pages)
+                      total_pages,
+                      battery_pct=battery)
     show(img)
 
 

@@ -196,9 +196,19 @@ def render_page(lines, current_page_num, total_pages, battery_pct=75):
     img  = Image.new('1', (W, H), 255)
     draw = ImageDraw.Draw(img)
 
-    # Battery — top left
-    pct_text = f'{battery_pct}%'
-    draw.text((MARGIN_LEFT, 10), pct_text, font=FONT_UI, fill=0)
+    # Battery — top right, black rounded pill matching home screen
+    pct_text = f'{battery_pct}'
+    pct_w    = draw.textlength(pct_text, font=FONT_UI_BOLD)
+    pill_pad = 10
+    pill_x   = W - MARGIN_RIGHT - pct_w - pill_pad * 2
+    pill_y   = 8
+    draw.rounded_rectangle(
+        [pill_x, pill_y, pill_x + pct_w + pill_pad * 2, pill_y + 28],
+        radius=14,
+        fill=0
+    )
+    draw.text((pill_x + pill_pad, pill_y + 6),
+              pct_text, font=FONT_UI_BOLD, fill=255)
 
     # Draw each line of text
     y = MARGIN_TOP
@@ -253,7 +263,7 @@ def render_home(selected_index=0, battery_pct=75):
     draw.text((36, 24), 'MY LIBRARY', font=FONT_TOPBAR, fill=0)
 
     ## Battery — top right, black rounded pill
-    pct_text = f'{battery_pct}%'
+    pct_text = f'{battery_pct}'
     pct_w    = draw.textlength(pct_text, font=FONT_UI_BOLD)
     pill_pad = 10
     pill_x   = W - 36 - pct_w - pill_pad * 2
