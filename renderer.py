@@ -192,13 +192,13 @@ def get_pages(epub_path):
 # PAGE RENDERING
 # ══════════════════════════════════════════════════════════
 
-def render_page(lines, current_page_num, total_pages):
-    """
-    Takes a list of text lines and draws them onto a blank canvas.
-    Returns a Pillow Image object ready to send to the display.
-    """
+def render_page(lines, current_page_num, total_pages, battery_pct=75):
     img  = Image.new('1', (W, H), 255)
     draw = ImageDraw.Draw(img)
+
+    # Battery — top left
+    pct_text = f'{battery_pct}%'
+    draw.text((MARGIN_LEFT, 10), pct_text, font=FONT_UI, fill=0)
 
     # Draw each line of text
     y = MARGIN_TOP
@@ -207,7 +207,7 @@ def render_page(lines, current_page_num, total_pages):
             draw.text((MARGIN_LEFT, y), line, font=FONT_BODY, fill=0)
         y += LINE_SPACING
 
-    # Thin divider line above page number
+    # Thin divider line above footer
     draw.line(
         [MARGIN_LEFT, H - MARGIN_BOTTOM + 6,
          W - MARGIN_RIGHT, H - MARGIN_BOTTOM + 6],
