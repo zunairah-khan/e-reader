@@ -318,14 +318,14 @@ def render_home(selected_index=0, battery_pct=75):
         bar_x, bar_y, bar_w, bar_h = 28, y + 48, W - 60, 6
 
         if sel:
-            # Track — dark grey on black
+        # Track — medium grey on black so fill is visible
             draw.rounded_rectangle(
                 [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                radius=3, fill=80
+                radius=3, fill=60
             )
             # Fill — white
-            if pct_int > 0:
-                fill_w = max(6, int(bar_w * pct))
+            fill_w = int(bar_w * pct)
+            if fill_w > 0:
                 draw.rounded_rectangle(
                     [bar_x, bar_y, bar_x + fill_w, bar_y + bar_h],
                     radius=3, fill=255
