@@ -1,3 +1,4 @@
+from curses import raw
 import os
 import re
 import json
@@ -330,10 +331,10 @@ def render_home(selected_index=0, battery_pct=75):
                     radius=3, fill=255
                 )
         else:
-            # Track — light grey
+            # Track — light grey with black outline
             draw.rounded_rectangle(
                 [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-                radius=3, fill=220
+                radius=3, fill=220, outline=0, width=1
             )
             # Fill — black
             if pct_int > 0:
@@ -356,23 +357,21 @@ def render_home(selected_index=0, battery_pct=75):
     draw.ellipse([32, H - 58, 40, H - 50], fill=0)
     draw.ellipse([W - 40, H - 58, W - 32, H - 50], fill=0)
 
+    about_text = 'About'
+    about_w    = draw.textlength(about_text, font=FONT_UI_BOLD)
+
     if about_sel:
-        # Rounded border around About when selected
+        # Black filled rounded rectangle, white text
         draw.rounded_rectangle(
             [10, H - 48, W - 10, H - 8],
             radius=12,
-            outline=0,
-            width=2
+            fill=0
         )
-        about_text = 'About'
-        about_w    = draw.textlength(about_text, font=FONT_UI_BOLD)
         draw.text(((W - about_w) // 2, H - 38),
-                  about_text, font=FONT_UI_BOLD, fill=0)
+              about_text, font=FONT_UI_BOLD, fill=255)
     else:
-        about_text = 'About'
-        about_w    = draw.textlength(about_text, font=FONT_UI_BOLD)
         draw.text(((W - about_w) // 2, H - 38),
-                  about_text, font=FONT_UI_BOLD, fill=0)
+              about_text, font=FONT_UI_BOLD, fill=0)
 
     return img
 
