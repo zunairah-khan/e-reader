@@ -125,49 +125,36 @@ def do_shutdown():
 # NAVIGATION — HOME SCREEN
 # ══════════════════════════════════════════════════════════
 
-def home_up():
-    global selected_index
-    books = get_books()
-    total = len(books) + 2  # books + Upload + About
-    selected_index = (selected_index - 1) % total
-    show_home()
-
-
 def home_down():
     global selected_index
     books = get_books()
-    total = len(books) + 2
+    total = len(books) + 1  # books + About only
     selected_index = (selected_index + 1) % total
     show_home()
 
+def home_up():
+    global selected_index
+    books = get_books()
+    total = len(books) + 1
+    selected_index = (selected_index - 1) % total
+    show_home()
 
 def home_select():
     global state, current_book, current_page, total_pages, pages
     books = get_books()
 
     if selected_index < len(books):
-        # Open a book
         book_file = books[selected_index]
         book_path = os.path.join(BOOKS_DIR, book_file)
-
-        # Load cached pages or paginate
         pages = get_pages(book_path)
         total_pages = len(pages)
-
-        # Load saved progress
         saved_page, _ = load(book_file)
-        current_page  = saved_page
-        current_book  = book_file
-        state         = STATE_READING
-
+        current_page = min(saved_page, len(pages) - 1)
+        current_book = book_file
+        state        = STATE_READING
         show_current_page()
 
     elif selected_index == len(books):
-        # Upload option selected — show IP address info
-        pass  # handled by server.py running in background
-
-    elif selected_index == len(books) + 1:
-        # About selected
         state = STATE_ABOUT
         show_about()
 

@@ -22,7 +22,7 @@ LINE_SPACING  = 34
 MAX_LINES     = (H - MARGIN_TOP - MARGIN_BOTTOM) // LINE_SPACING
 
 # ── Characters per line — adjust to match font size ─────
-CHARS_PER_LINE = 43
+CHARS_PER_LINE = 42
 
 # ── Fonts ───────────────────────────────────────────────
 def load_font(name, size):
@@ -47,7 +47,7 @@ def load_font(name, size):
             print(f'Font error: {e}')
             return ImageFont.load_default()
 
-FONT_BODY    = load_font('LiberationSerif-Regular.ttf', 25)
+FONT_BODY    = load_font('LiberationSerif-Regular.ttf', 22)
 FONT_UI      = load_font('LiberationSans-Regular.ttf', 15)
 FONT_UI_BOLD = load_font('LiberationSans-Bold.ttf', 17)
 FONT_TOPBAR  = load_font('LiberationSans-Bold.ttf', 22)
@@ -240,11 +240,6 @@ def draw_battery(draw, pct, x, y):
 
 
 def render_home(selected_index=0, battery_pct=75):
-    """
-    Draws the home/library screen.
-    selected_index is which item the cursor is currently on.
-    Returns a Pillow Image object.
-    """
     img  = Image.new('1', (W, H), 255)
     draw = ImageDraw.Draw(img)
 
@@ -253,20 +248,33 @@ def render_home(selected_index=0, battery_pct=75):
         if f.endswith('.epub')
     ])
 
-    # ── Top bar ────────────────────────────────────────
-    draw.rectangle([0, 0, W, 46], fill=0)
-    draw.text((24, 12), 'MY LIBRARY', font=FONT_TOPBAR, fill=255)
+    # ── Header ─────────────────────────────────────────
+    draw.text((36, 24), 'MY LIBRARY', font=FONT_TOPBAR, fill=0)
 
-    # Battery percentage
+    ## Battery — top right, black rounded pill
     pct_text = f'{battery_pct}%'
-    pct_w    = draw.textlength(pct_text, font=FONT_UI)
-    draw.text((W - pct_w - 54, 16), pct_text, font=FONT_UI, fill=255)
-    draw_battery(draw, battery_pct, W - 50, 14)
+    pct_w    = draw.textlength(pct_text, font=FONT_UI_BOLD)
+    pill_pad = 10
+    pill_x   = W - 36 - pct_w - pill_pad * 2
+    pill_y   = 18
+    draw.rounded_rectangle(
+        [pill_x, pill_y, pill_x + pct_w + pill_pad * 2, pill_y + 28],
+        radius=14,
+        fill=0
+    )
+    draw.text((pill_x + pill_pad, pill_y + 6), pct_text, font=FONT_UI_BOLD, fill=255)
 
-    # ── Book rows ──────────────────────────────────────
-    ROW_H   = 72
-    y_start = 46
-    visible = 4
+    # Curved rule under header — drawn as a very shallow arc
+    # Simulated with a thick line and rounded caps
+    draw.line([36, 58, W - 36, 58], fill=0, width=1)
+    # Small decorative end circles
+    draw.ellipse([32, 54, 40, 62], fill=0)
+    draw.ellipse([W - 40, 54, W - 32, 62], fill=0)
+
+    # ── Book list ──────────────────────────────────────
+    ROW_H   = 76
+    y_start = 70
+    visible = 6
 
     scroll = max(0, selected_index - visible + 1)
 
@@ -278,87 +286,93 @@ def render_home(selected_index=0, battery_pct=75):
         book = books[idx]
         y    = y_start + i * ROW_H
         sel  = (idx == selected_index)
-        bg   = 0 if sel else 255
-        fg   = 255 if sel else 0
-
-        draw.rectangle([0, y, W, y + ROW_H - 1], fill=bg)
 
         if sel:
-            draw.text((12, y + 22), '>', font=FONT_UI_BOLD, fill=fg)
+            # Filled black rounded rectangle
+            draw.rounded_rectangle(
+                [10, y + 2, W - 10, y + ROW_H - 4],
+                radius=12,
+                fill=0
+            )
+            fg = 255  # white text and elements on black
+        else:
+            fg = 0    # black text on white
 
-        # Title — strip .epub extension
+        # Title
         title = os.path.splitext(book)[0]
-        # Truncate long titles so they don't overflow
-        while draw.textlength(title, font=FONT_UI_BOLD) > W - 80:
+        while draw.textlength(title, font=FONT_UI_BOLD) > W - 100:
             title = title[:-1]
-        draw.text((36, y + 8), title, font=FONT_UI_BOLD, fill=fg)
 
-        # Progress bar
+        text_x = 28 if sel else 20
+        draw.text((text_x, y + 10), title, font=FONT_UI_BOLD, fill=fg)
+
+        # Progress percentage — right aligned
         pct     = get_completion(book)
         pct_int = int(pct * 100)
-        bar_x, bar_y, bar_w, bar_h = 36, y + 50, 200, 5
+        label   = f'{pct_int}%' + (' ✓' if pct_int == 100 else '')
+        label_w = draw.textlength(label, font=FONT_UI_BOLD)
+        draw.text((W - 36 - label_w, y + 10), label, font=FONT_UI_BOLD, fill=fg)
 
-        draw.rectangle(
-            [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
-            fill=fg
-        )
-        if pct_int < 100:
-            fill_end = bar_x + int(bar_w * pct)
-            draw.rectangle(
-                [fill_end, bar_y, bar_x + bar_w, bar_y + bar_h],
-                fill=bg
+        # Rounded progress bar
+        bar_x, bar_y, bar_w, bar_h = 28, y + 48, W - 60, 6
+
+        if sel:
+            # Track — dark grey on black
+            draw.rounded_rectangle(
+                [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
+                radius=3, fill=80
             )
+            # Fill — white
+            if pct_int > 0:
+                fill_w = max(6, int(bar_w * pct))
+                draw.rounded_rectangle(
+                    [bar_x, bar_y, bar_x + fill_w, bar_y + bar_h],
+                    radius=3, fill=255
+                )
+        else:
+            # Track — light grey
+            draw.rounded_rectangle(
+                [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
+                radius=3, fill=220
+            )
+            # Fill — black
+            if pct_int > 0:
+                fill_w = max(6, int(bar_w * pct))
+                draw.rounded_rectangle(
+                    [bar_x, bar_y, bar_x + fill_w, bar_y + bar_h],
+                    radius=3, fill=0
+                )
 
-        label = f'{pct_int}%' + (' ✓' if pct_int == 100 else '')
-        draw.text(
-            (bar_x + bar_w + 10, bar_y - 2),
-            label, font=FONT_UI, fill=fg
-        )
-
+        # Row divider — only on unselected rows
         if not sel:
-            draw.line([0, y + ROW_H - 1, W, y + ROW_H - 1],
-                      fill=180, width=1)
+            draw.line([36, y + ROW_H - 2, W - 36, y + ROW_H - 2],
+                      fill=200, width=1)
 
-    # ── Bottom menu ────────────────────────────────────
-    menu_y = y_start + visible * ROW_H
-    draw.line([0, menu_y, W, menu_y], fill=0, width=1)
+    # ── About — bottom ─────────────────────────────────
+    about_sel = (selected_index == len(books))
 
-    menu_options = [
-        ('[ Upload New Book ]', 'Visit device IP:5000'),
-        ('[ About ]',           'Controls & info'),
-    ]
+    # Decorative rule above About — same style as header
+    draw.line([36, H - 54, W - 36, H - 54], fill=0, width=1)
+    draw.ellipse([32, H - 58, 40, H - 50], fill=0)
+    draw.ellipse([W - 40, H - 58, W - 32, H - 50], fill=0)
 
-    for i, (label, sublabel) in enumerate(menu_options):
-        idx   = len(books) + i
-        sel   = (selected_index == idx)
-        x     = (W // 4) + i * (W // 2)
-        bg    = 0 if sel else 255
-        fg    = 255 if sel else 0
-        left  = i * (W // 2)
-        right = left + W // 2
-
-        draw.rectangle([left, menu_y, right, menu_y + 72], fill=bg)
-        draw.text((x, menu_y + 14), label,
-                  font=FONT_UI_BOLD, fill=fg, anchor='mm')
-        draw.text((x, menu_y + 40), sublabel,
-                  font=FONT_UI, fill=fg, anchor='mm')
-
-    draw.line([W // 2, menu_y, W // 2, menu_y + 72], fill=0, width=1)
-
-    # ── Controls hint bar ──────────────────────────────
-    hint_y = menu_y + 73
-    draw.rectangle([0, hint_y, W, H], fill=230)
-    draw.line([0, hint_y, W, hint_y], fill=0, width=1)
-    draw.text(
-        (W // 2, hint_y + 16),
-        'UP/DOWN  Navigate     SELECT  Open     MENU  Return',
-        font=FONT_UI, fill=0, anchor='mm'
-    )
-    draw.text(
-        (W // 2, hint_y + 36),
-        'Hold MENU 2s to power off safely',
-        font=FONT_UI, fill=100, anchor='mm'
-    )
+    if about_sel:
+        # Rounded border around About when selected
+        draw.rounded_rectangle(
+            [10, H - 48, W - 10, H - 8],
+            radius=12,
+            outline=0,
+            width=2
+        )
+        about_text = 'About'
+        about_w    = draw.textlength(about_text, font=FONT_UI_BOLD)
+        draw.text(((W - about_w) // 2, H - 38),
+                  about_text, font=FONT_UI_BOLD, fill=0)
+    else:
+        about_text = 'About'
+        about_w    = draw.textlength(about_text, font=FONT_UI_BOLD)
+        draw.text(((W - about_w) // 2, H - 38),
+                  about_text, font=FONT_UI_BOLD, fill=0)
 
     return img
 
@@ -368,40 +382,94 @@ def render_home(selected_index=0, battery_pct=75):
 # ══════════════════════════════════════════════════════════
 
 def render_about():
-    """Draws the about/help screen."""
+    """Draws the about/help screen — minimal editorial style."""
     img  = Image.new('1', (W, H), 255)
     draw = ImageDraw.Draw(img)
 
-    # Top bar
-    draw.rectangle([0, 0, W, 46], fill=0)
-    draw.text((24, 12), 'ABOUT', font=FONT_TOPBAR, fill=255)
+    # ── Header ─────────────────────────────────────────
+    draw.text((36, 24), 'ABOUT', font=FONT_TOPBAR, fill=0)
 
-    lines = [
-        ('Controls', True),
-        ('UP / DOWN  —  Navigate menu', False),
-        ('SELECT     —  Open book / confirm', False),
-        ('MENU       —  Return to library', False),
-        ('Hold MENU  —  Power off safely', False),
-        ('', False),
-        ('Upload Books', True),
-        ('Connect to the same WiFi and visit', False),
-        ('the device IP address on port 5000', False),
-        ('in your browser to upload EPUBs.', False),
+    # Decorative rule — same style as home screen
+    draw.line([36, 58, W - 36, 58], fill=0, width=1)
+    draw.ellipse([32, 54, 40, 62], fill=0)
+    draw.ellipse([W - 40, 54, W - 32, 62], fill=0)
+
+    # ── Controls section ───────────────────────────────
+    y = 78
+
+    # Section label — rounded pill
+    draw.rounded_rectangle([36, y, 140, y + 24], radius=12, fill=0)
+    draw.text((88, y + 6), 'Controls', font=FONT_UI_BOLD,
+              fill=255, anchor='mt')
+
+    y += 34
+
+    controls = [
+        ('UP / DOWN', 'Navigate'),
+        ('SELECT',    'Open book'),
+        ('MENU',      'Return to library'),
+        ('Hold MENU', 'Power off'),
     ]
 
-    y = 60
-    for text, bold in lines:
-        if text:
-            font = FONT_UI_BOLD if bold else FONT_UI
-            draw.text((MARGIN_LEFT, y), text, font=font, fill=0)
-        y += 28
+    for key, action in controls:
+        # Key label — small rounded border
+        key_w = draw.textlength(key, font=FONT_UI_BOLD) + 16
+        draw.rounded_rectangle([36, y, 36 + key_w, y + 22],
+                               radius=6, outline=0, width=1)
+        draw.text((44, y + 3), key, font=FONT_UI_BOLD, fill=0)
 
-    # Back hint
-    draw.line([0, H - 36, W, H - 36], fill=0, width=1)
-    draw.text((W // 2, H - 18), 'Press MENU to return',
+        # Action — plain text after key
+        draw.text((36 + key_w + 12, y + 3), action, font=FONT_UI_BOLD, fill=0)
+
+        y += 34
+
+    # ── Upload section ─────────────────────────────────
+    y += 8
+
+    # Section divider
+    draw.line([36, y, W - 36, y], fill=0, width=1)
+    draw.ellipse([32, y - 4, 40, y + 4], fill=0)
+    draw.ellipse([W - 40, y - 4, W - 32, y + 4], fill=0)
+
+    y += 14
+
+    # Section label — rounded pill
+    draw.rounded_rectangle([36, y, 172, y + 24], radius=12, fill=0)
+    draw.text((104, y + 6), 'Upload Books', font=FONT_UI_BOLD,
+              fill=255, anchor='mt')
+
+    y += 34
+
+    upload_lines = [
+        'Connect to the same WiFi and visit the device IP address on',
+        'port 5000 in your browser.'
+    ]
+
+    for line in upload_lines:
+        draw.text((36, y), line, font=FONT_UI, fill=0)
+        y += 26
+
+    # ── IP address — rounded box ────────────────────────
+    y += 8
+    ip_text = '192.168.1.118:5000'
+    ip_w    = draw.textlength(ip_text, font=FONT_UI_BOLD)
+    box_x   = (W - ip_w - 24) // 2
+    draw.rounded_rectangle([box_x, y, box_x + ip_w + 24, y + 28],
+                           radius=8, outline=0, width=1, fill=0)
+    draw.text((box_x + 12, y + 4), ip_text, font=FONT_UI_BOLD, fill=255)
+
+    # ── Back hint ──────────────────────────────────────
+    draw.line([36, H - 54, W - 36, H - 54], fill=0, width=1)
+    draw.ellipse([32, H - 58, 40, H - 50], fill=0)
+    draw.ellipse([W - 40, H - 58, W - 32, H - 50], fill=0)
+
+    draw.text((W // 2, H - 32), 'Press MENU to return',
               font=FONT_UI, fill=0, anchor='mm')
 
     return img
+
+
+
 
 
 # ══════════════════════════════════════════════════════════
@@ -416,23 +484,37 @@ def render_shutdown_screen():
     img  = Image.new('1', (W, H), 255)
     draw = ImageDraw.Draw(img)
 
-    # Outer border
-    draw.rectangle([8, 8, W - 8, H - 8], outline=0, width=2)
-    draw.rectangle([12, 12, W - 12, H - 12], outline=0, width=1)
+    # Outer rounded border
+    draw.rounded_rectangle([8, 8, W - 8, H - 8],
+                           radius=20, outline=0, width=2)
+    draw.rounded_rectangle([14, 14, W - 14, H - 14],
+                           radius=16, outline=0, width=1)
+
+    # Decorative circles in corners
+    for cx, cy in [(36, 36), (W - 36, 36),
+                   (36, H - 36), (W - 36, H - 36)]:
+        draw.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], outline=0, width=1)
+        draw.ellipse([cx - 2, cy - 2, cx + 2, cy + 2], fill=0)
+
+    # Decorative rule above text
+    draw.line([60, H // 2 - 52, W - 60, H // 2 - 52], fill=0, width=1)
+    draw.ellipse([56, H // 2 - 56, 64, H // 2 - 48], fill=0)
+    draw.ellipse([W - 64, H // 2 - 56, W - 56, H // 2 - 48], fill=0)
 
     # Central text
-    draw.text((W // 2, H // 2 - 30), 'POWERED OFF',
-              font=FONT_TOPBAR, fill=0, anchor='mm')
-    draw.text((W // 2, H // 2 + 10), 'Hold power button to wake',
+    powered_w = draw.textlength('POWERED OFF', font=FONT_TOPBAR)
+    draw.text(((W - powered_w) // 2, H // 2 - 40),
+              'POWERED OFF', font=FONT_TOPBAR, fill=0)
+
+    draw.text((W // 2, H // 2 + 8), 'Hold power button to wake',
               font=FONT_UI, fill=0, anchor='mm')
 
-    # Decorative corner marks
-    for cx, cy in [(24, 24), (W - 24, 24),
-                   (24, H - 24), (W - 24, H - 24)]:
-        draw.rectangle([cx - 5, cy - 5, cx + 5, cy + 5], fill=0)
+    # Decorative rule below text
+    draw.line([60, H // 2 + 30, W - 60, H // 2 + 30], fill=0, width=1)
+    draw.ellipse([56, H // 2 + 26, 64, H // 2 + 34], fill=0)
+    draw.ellipse([W - 64, H // 2 + 26, W - 56, H // 2 + 34], fill=0)
 
     return img
-
 
 # ══════════════════════════════════════════════════════════
 # ROTATION FUNCTION
@@ -489,8 +571,20 @@ if __name__ == '__main__':
 
         # Render home screen as PNG
         print('Rendering home screen...')
-        img = render_home(selected_index=0, battery_pct=75)
+        img = render_home(selected_index=0, battery_pct=100)
         img.save('test_home.png')
         print('Saved test_home.png')
+
+        # Render about screen
+        print('Rendering about screen...')
+        img = render_about()
+        img.save('test_about.png')
+        print('Saved test_about.png')
+
+        # Render shutdown screen
+        print('Rendering shutdown screen...')
+        img = render_shutdown_screen()
+        img.save('test_shutdown.png')
+        print('Saved test_shutdown.png')
 
         print('All done — open PNG files to check layout.')
