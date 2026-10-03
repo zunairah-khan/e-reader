@@ -69,10 +69,10 @@ The hardware parts were chosen for their easy assembly.
 
 The pisugar battery connects firectly to the back of the Pi, and the dupont jumper wires connect easily to the pi's GPIO pins, connecting the pi to the e-ink display and control buttons. This allows for easy initial prototyping as no soldering is required.
 
-![Assembled Prototype](images/AssembledPrototype.png)
+![Assembled Prototype](images/AssembledPrototype.jpg)
 
 
-![Close-up of pisugar attached to bottom of the Pi](images/PiWithSugarAndGPIOConnections.png)
+![Close-up of pisugar attached to bottom of the Pi](images/PiWithSugarAndGPIOConnections.jpg)
 
 
 ## Button Wiring
@@ -89,7 +89,6 @@ Since the e-ink display connects via the 9-pin cable rather than sitting directl
 | Down | GPIO 6 | Pin 31 | Pin 34 |
 | Select | GPIO 13 | Pin 33 | Pin 39 |
 | Menu | GPIO 19 | Pin 35 | Pin 25 |
-
 
 The Menu button handles both short press (return to home) and long press (2 seconds — shutdown). On shutdown, the display shows either a custom uploaded screensaver or a generated powered-off screen, then the Pi shuts down cleanly.
 
