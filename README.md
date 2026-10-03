@@ -53,13 +53,17 @@ The project is split into four Python files, each with a single responsibility:
 
 **`progress.py`** — SQLite database that saves reading position (current page and total pages) for each book. Every page turn writes to it. On startup it's read to resume where you left off.
 
-**`server.py`** — Flask web server that runs in the background. Visiting the Pi's IP address on port 5000 from any device on the same WiFi shows a library page where you can upload EPUBs, delete books, and upload a custom screensaver image.
+**`server.py`** — Flask web server that runs in the background. Visiting the Pi's IP address on port 5000 from any device on the same WiFi shows a library page where you can upload EPUBs, delete books, and upload a custom screensaver image. The index.html template draws the webpage for the server.
 
-**`renderer.py`** — Takes book text and draws it as a black and white bitmap image at the display's resolution (480×648 portrait). Handles EPUB parsing, text extraction, pagination by character count, and rendering the home screen, about screen, and shutdown screen. Tested on a laptop by saving PNG previews before deploying to the Pi.
+![alt text](image.png)
 
-**`reader.py`** — The main program. Initialises the display, starts the server in the background, listens for button presses via GPIO interrupts, and manages the state machine (home, reading, about). Calls renderer.py to draw screens and progress.py to save position.
+**`renderer.py`** — takes book text and draws it as a bitmap image at the display's resolution (480×648 portrait). Handles EPUB parsing, text extraction, pagination by character count, and rendering the home screen, about screen, and shutdown screen. Tested on a laptop by saving PNG previews before deploying to the Pi.
+
+**`reader.py`** — main program that initialises the display, starts the server in the background, listens for button presses via GPIO interrupts, and manages the state machine (home, reading, about). Calls renderer.py to draw screens and progress.py to save position.
 
 ---
+
+## Prototype Assembly
 
 ## Button Wiring
 
@@ -74,7 +78,7 @@ Since the display connects via the 9-pin cable rather than sitting directly on t
 | Select | GPIO 13 | Pin 33 | Pin 39 |
 | Menu | GPIO 19 | Pin 35 | Pin 25 |
 
-**Soldering note:** The stainless steel 12mm buttons come with bare wire ends. To connect them to the Pi's GPIO header without soldering directly to the board, female-to-female dupont jumper wires are used as an intermediate. Strip a small amount of insulation from both the button wire and the cut end of a dupont wire, twist the copper together, and solder the join. Cover with heat shrink. The female dupont end then pushes directly onto the GPIO pin.
+
 
 ![Prototype button wiring — image placeholder]
 
