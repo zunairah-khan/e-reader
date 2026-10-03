@@ -96,7 +96,7 @@ The Menu button handles both short press (return to home) and long press (2 seco
 
 ## Autostart on Boot
 
-A systemd service starts reader.py automatically when the Pi boots. No SSH or manual intervention needed — power on, wait for boot, home screen appears.
+A systemd service starts reader.py automatically when the Pi boots.
 
 ```bash
 sudo nano /etc/systemd/system/ereader.service
