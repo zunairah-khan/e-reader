@@ -55,7 +55,7 @@ The project is split into four Python files, each with a single responsibility:
 
 **`server.py`** — Flask web server that runs in the background. Visiting the Pi's IP address on port 5000 from any device on the same WiFi shows a library page where you can upload EPUBs, delete books, and upload a custom screensaver image. The index.html template draws the webpage for the server.
 
-![Screenshot of server webpage](images/Server Webpage.jpg)
+![Screenshot of server webpage](images/ServerWebpage.png)
 
 **`renderer.py`** — takes book text and draws it as a bitmap image at the display's resolution (480×648 portrait). Handles EPUB parsing, text extraction, pagination by character count, and rendering the home screen, about screen, and shutdown screen. Tested on a laptop by saving PNG previews before deploying to the Pi.
 
