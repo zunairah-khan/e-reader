@@ -7,6 +7,6 @@ __pycache__/
 #no copyrighted book files
 books/
 #no test outputs from renderer
-*.png
+#*.png
 #no cached pages from renderer
 *_pages.json
