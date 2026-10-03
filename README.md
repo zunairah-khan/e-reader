@@ -77,7 +77,7 @@ The pisugar battery connects firectly to the back of the Pi, and the dupont jump
 
 ## Button Wiring
 
-Four buttons are used — Up, Down, Select, and Menu. Each button connects between a GPIO pin and a Ground pin on the Pi's 40-pin header.
+Four buttons are used: Up, Down, Select, and Menu. Each button connects between a GPIO pin and a Ground pin on the Pi's 40-pin header.
 
 In the Assembled prototype, each component is using a separate ground pin for its ground connection. Of course, a poished version would common all button grounds to a single GPIO ground pin, reducing wiring complexity and freeing up ground pins for other components.
 
