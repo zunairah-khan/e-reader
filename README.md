@@ -17,11 +17,9 @@ A custom e-reader built with a Raspberry Pi Zero 2W and Waveshare 5.83" e-ink di
 
 ## Raspberry Pi Setup
 
-The Pi runs **Raspberry Pi OS Lite (32-bit)** — the headless version with no desktop. It's flashed to the SD card using Raspberry Pi Imager. Before flashing, WiFi credentials, SSH, hostname, and a username are configured directly in the Imager settings so the Pi connects to the network automatically on first boot.
+The Pi runs Raspberry Pi OS Lite (32-bit) which was flashed to the SD card using Raspberry Pi Imager.
 
-Once powered on, everything is done over SSH from a laptop. There's no monitor or keyboard connected to the Pi at any point.
-
-After SSHing in, the system is updated and the required packages installed:
+After SSHing in once the Pi is booted, update the system and install the required packages:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -39,19 +37,13 @@ Two hardware interfaces need enabling via `raspi-config`:
 
 **I2C** is used by the PiSugar battery board to report battery percentage and charging status back to the Pi. It's a two-wire protocol designed for short board-to-board communication.
 
-```bash
-sudo raspi-config
-# Interface Options → SPI → Enable
-# Interface Options → I2C → Enable
-```
-
 ---
 
 ## Software
 
-The project is split into four Python files, each with a single responsibility:
+The project is split into four Python files:
 
-**`progress.py`** — SQLite database that saves reading position (current page and total pages) for each book. Every page turn writes to it. On startup it's read to resume where you left off.
+**`progress.py`** — SQLite database that saves reading position (current page and total pages) for each book. Every page turn writes to it and its read on startup to resume where you left off.
 
 **`server.py`** — Flask web server that runs in the background. Visiting the Pi's IP address on port 5000 from any device on the same WiFi shows a library page where you can upload EPUBs, delete books, and upload a custom screensaver image. The index.html template draws the webpage for the server.
 
