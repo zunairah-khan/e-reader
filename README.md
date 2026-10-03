@@ -65,11 +65,23 @@ The project is split into four Python files, each with a single responsibility:
 
 ## Prototype Assembly
 
+The hardware parts were chosen for their easy assembly.
+
+The pisugar battery connects firectly to the back of the Pi, and the dupont jumper wires connect easily to the pi's GPIO pins, connecting the pi to the e-ink display and control buttons. This allows for easy initial prototyping as no soldering is required.
+
+![Assembled Prototype](images/AssembledPrototype.png)
+
+
+![Close-up of pisugar attached to bottom of the Pi](images/PiWithSugarAndGPIOConnections.png)
+
+
 ## Button Wiring
 
 Four buttons are used — Up, Down, Select, and Menu. Each button connects between a GPIO pin and a Ground pin on the Pi's 40-pin header.
 
-Since the display connects via the 9-pin cable rather than sitting directly on the GPIO header, all 40 pins are accessible for buttons.
+In the Assembled prototype, each component is using a separate ground pin for its ground connection. Of course, a poished version would common all button grounds to a single GPIO ground pin, reducing wiring complexity and freeing up ground pins for other components.
+
+Since the e-ink display connects via the 9-pin cable rather than sitting directly on the GPIO header, all 40 pins are accessible for buttons.
 
 | Button | GPIO | Board Pin | Ground Pin |
 |---|---|---|---|
@@ -78,9 +90,6 @@ Since the display connects via the 9-pin cable rather than sitting directly on t
 | Select | GPIO 13 | Pin 33 | Pin 39 |
 | Menu | GPIO 19 | Pin 35 | Pin 25 |
 
-
-
-![Prototype button wiring — image placeholder]
 
 The Menu button handles both short press (return to home) and long press (2 seconds — shutdown). On shutdown, the display shows either a custom uploaded screensaver or a generated powered-off screen, then the Pi shuts down cleanly.
 
@@ -114,15 +123,3 @@ sudo systemctl enable ereader.service
 sudo systemctl start ereader.service
 ```
 
-To allow passwordless shutdown (required when running headlessly):
-
-```bash
-sudo visudo
-# Add: pi ALL=(ALL) NOPASSWD: /sbin/shutdown
-```
-
----
-
-## WiFi Upload Interface
-
-Books are uploaded wirelessly via a browser interface served by Flask. Connect any device to the same WiFi network and visit:
