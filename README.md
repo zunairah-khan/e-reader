@@ -69,10 +69,10 @@ The hardware parts were chosen for their easy assembly.
 
 The pisugar battery connects firectly to the back of the Pi, and the dupont jumper wires connect easily to the pi's GPIO pins, connecting the pi to the e-ink display and control buttons. This allows for easy initial prototyping as no soldering is required.
 
-![Assembled Prototype](images/AssembledPrototype.jpg)
+![Assembled Prototype](images/AssembledPrototype.JPG)
 
 
-![Close-up of pisugar attached to bottom of the Pi](images/PiWithSugarAndGPIOConnections.jpg)
+![Close-up of pisugar attached to bottom of the Pi](images/PiWithSugarAndGPIOConnections.JPG)
 
 
 ## Button Wiring
