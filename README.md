@@ -6,12 +6,12 @@ A custom e-reader built with a Raspberry Pi Zero 2W and Waveshare 5.83" e-ink di
 
 ## Parts
 
- Raspberry Pi Zero 2W 
- Waveshare 5.83" e-ink HAT V2  
- PiSugar 3 (1200mAh) 
- MicroSD card 32GB 
- 4× tactile buttons
- Dupont jumper wires  
+ - Raspberry Pi Zero 2W 
+ - Waveshare 5.83" e-ink HAT V2  
+ - PiSugar 3 (1200mAh) 
+ - MicroSD card 32GB 
+ - 4× tactile buttons
+ - Dupont jumper wires  
 
 ---
 
