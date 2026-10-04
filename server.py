@@ -1,6 +1,6 @@
-#server.py runs a tiny website on the device. When connecting your own device to the same WiFi network as the ereader and visit its IP in a browser, server.py is what responds
-#server.py serves pages, accepts file uploads, and manages the library through a web browser
-#server.py should:
+# runs a tiny website on the device. When connecting your own device to the same WiFi network as the ereader and visit its IP in a browser, server.py is what responds
+# serves pages, accepts file uploads, and manages the library through a web browser
+#server should:
 #show the library page when someone visits the IP in the browser
 #accept new book uploads and return to library page
 #delete existing books and return to library page
@@ -108,8 +108,6 @@ def delete_screensaver():
 
 
 # only runs when file is directly run. helpful for testing purposes
-# host is 0.0.0.0 and not localhost so that flask accepts connections from any device on the network rather than just this computer
-# server listens on port 5000
-# debug on so flask shows error page in browser and restarts itself whenever changes are saved to the file. Only on for development
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

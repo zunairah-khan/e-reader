@@ -13,16 +13,16 @@ DB = os.path.join(os.path.dirname(__file__), 'progress.db')
 def init_db():
     """RUNS ONCE ON STARTUP. 
     Creates the database and table if they dont exist yet. safe to call every time the app starts."""
-    conn = sqlite3.connect(DB) #opens a connection to db file. SQL creates it automatically if it doesnt exist yet.
+    conn = sqlite3.connect(DB) #open connection to db file.
     conn.execute(''' 
         CREATE TABLE IF NOT EXISTS progress (
             book        TEXT PRIMARY KEY,
             page        INTEGER DEFAULT 0,
             total_pages INTEGER DEFAULT 1
         )
-    ''') #sends sql instruction to database to create progress table if doesnt exist already.
-    conn.commit() #saves changes permanently to disk
-    conn.close() #closes database connection to save memory
+    ''') #send sql instruction to dbto create progress table if doesnt exist already.
+    conn.commit() 
+    conn.close() 
 
 def save(book,page,total_pages):
     """CALLED EVERY PAGE TURN. 
@@ -42,7 +42,7 @@ def load(book):
     row=conn.execute(
         'SELECT page, total_pages FROM progress WHERE book=?',
         (book,)
-    ).fetchone() #receives the result of the query
+    ).fetchone() #receive result of query
     conn.close()
     return row if row else (0,1)
 
@@ -66,8 +66,7 @@ def delete(book):
     conn.close()
 
 #TESTING
-# Built in python __name__ variable is __main__ only if progress.py is run directly. 
-# When another file imports from it, __name__ would be progress, so the testing code is ignored
+
 if __name__ == '__main__':
     init_db()
 

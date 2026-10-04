@@ -26,7 +26,7 @@ BTN_SELECT = 13
 BTN_MENU   = 19
 
 # ── State ───────────────────────────────────────────────
-# Tracks what the device is currently showing
+# Track what the device is currently showing
 STATE_HOME    = 'home'
 STATE_READING = 'reading'
 STATE_ABOUT   = 'about'
@@ -105,7 +105,7 @@ def show_about():
 
 def do_shutdown():
     """Display shutdown screen and power off."""
-    # Check if user has uploaded a custom screensaver
+    # check if custom screensaver uplaoded, else default to shutdown screen
     screensaver_path = os.path.join(
         os.path.dirname(__file__), 'images', 'screensaver.png'
     )
@@ -129,7 +129,7 @@ def do_shutdown():
 def home_down():
     global selected_index
     books = get_books()
-    total = len(books) + 1  # books + About only
+    total = len(books) + 1  # books + about only
     selected_index = (selected_index + 1) % total
     print(f'Books: {len(books)}, Total: {total}, Selected: {selected_index}')
     show_home()
@@ -226,7 +226,7 @@ def handle_menu_button():
 
 def button_callback(channel):
     """Called automatically when any button is pressed."""
-    time.sleep(0.05)  # debounce — wait for signal to settle
+    time.sleep(0.05)  # debounce 
 
     if channel == BTN_MENU:
         handle_menu_button()

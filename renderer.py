@@ -22,7 +22,7 @@ MARGIN_RIGHT  = 30
 LINE_SPACING  = 34
 MAX_LINES     = (H - MARGIN_TOP - MARGIN_BOTTOM) // LINE_SPACING
 
-# ── Characters per line — adjust to match font size ─────
+# ── Characters per line ─────
 CHARS_PER_LINE = 42
 
 # ── Fonts ───────────────────────────────────────────────
@@ -85,7 +85,7 @@ def extract_text(epub_path):
     for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
         text = strip_html(item.get_content())
 
-        # Skip very short documents — likely metadata, TOC, blank pages
+        # Skip very short documents like metadata, TOC, blank pages
         if len(text.strip()) < 300:
             continue
 
@@ -196,7 +196,7 @@ def render_page(lines, current_page_num, total_pages, battery_pct=75):
     img  = Image.new('1', (W, H), 255)
     draw = ImageDraw.Draw(img)
 
-    # Battery — top right, black rounded pill matching home screen
+    # Battery drawing
     pct_text = f'{battery_pct}'
     pct_w    = draw.textlength(pct_text, font=FONT_UI_BOLD)
     pill_pad = 10
@@ -210,21 +210,21 @@ def render_page(lines, current_page_num, total_pages, battery_pct=75):
     draw.text((pill_x + pill_pad, pill_y + 6),
               pct_text, font=FONT_UI_BOLD, fill=255)
 
-    # Draw each line of text
+    # draw each line of text
     y = MARGIN_TOP
     for line in lines:
         if line:
             draw.text((MARGIN_LEFT, y), line, font=FONT_BODY, fill=0)
         y += LINE_SPACING
 
-    # Thin divider line above footer
+    # thin divider line above footer
     draw.line(
         [MARGIN_LEFT, H - MARGIN_BOTTOM + 6,
          W - MARGIN_RIGHT, H - MARGIN_BOTTOM + 6],
         fill=0, width=1
     )
 
-    # Page number centred at the bottom
+    # page number centred at the bottom
     page_label = f'{current_page_num + 1} / {total_pages}'
     label_w    = draw.textlength(page_label, font=FONT_UI)
     draw.text(
@@ -262,7 +262,7 @@ def render_home(selected_index=0, battery_pct=75):
     # ── Header ─────────────────────────────────────────
     draw.text((36, 24), 'MY LIBRARY', font=FONT_TOPBAR, fill=0)
 
-    ## Battery — top right, black rounded pill
+    ## battery drawing
     pct_text = f'{battery_pct}'
     pct_w    = draw.textlength(pct_text, font=FONT_UI_BOLD)
     pill_pad = 10
@@ -275,10 +275,9 @@ def render_home(selected_index=0, battery_pct=75):
     )
     draw.text((pill_x + pill_pad, pill_y + 6), pct_text, font=FONT_UI_BOLD, fill=255)
 
-    # Curved rule under header — drawn as a very shallow arc
-    # Simulated with a thick line and rounded caps
+    # draw rule under header
     draw.line([36, 58, W - 36, 58], fill=0, width=1)
-    # Small decorative end circles
+    # decorative end circles
     draw.ellipse([32, 54, 40, 62], fill=0)
     draw.ellipse([W - 40, 54, W - 32, 62], fill=0)
 
@@ -299,7 +298,7 @@ def render_home(selected_index=0, battery_pct=75):
         sel  = (idx == selected_index)
 
         if sel:
-            # Filled black rounded rectangle
+            # filled black rounded rectangle
             draw.rounded_rectangle(
                 [10, y + 2, W - 10, y + ROW_H - 4],
                 radius=12,
@@ -317,7 +316,7 @@ def render_home(selected_index=0, battery_pct=75):
         text_x = 28 if sel else 20
         draw.text((text_x, y + 10), title, font=FONT_UI_BOLD, fill=fg)
 
-        # Progress percentage — right aligned
+        # Progress percentage 
         pct     = get_completion(book)
         pct_int = int(pct * 100)
         label   = f'{pct_int}%' + (' ✓' if pct_int == 100 else '')
@@ -333,7 +332,7 @@ def render_home(selected_index=0, battery_pct=75):
                 [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
                 radius=3, fill=60
             )
-            # Fill — white
+            # Fill, white
             fill_w = int(bar_w * pct)
             if fill_w > 0:
                 draw.rounded_rectangle(
@@ -341,12 +340,12 @@ def render_home(selected_index=0, battery_pct=75):
                     radius=3, fill=0
                 )
         else:
-            # Track — light grey with black outline
+            # Track, light grey with black outline
             draw.rounded_rectangle(
                 [bar_x, bar_y, bar_x + bar_w, bar_y + bar_h],
                 radius=3, fill=220, outline=0, width=1
             )
-            # Fill — black
+            # Fill,  black
             if pct_int > 0:
                 fill_w = max(6, int(bar_w * pct))
                 draw.rounded_rectangle(
@@ -354,7 +353,7 @@ def render_home(selected_index=0, battery_pct=75):
                     radius=3, fill=0
                 )
 
-        # Row divider — only on unselected rows
+        # Row divider on unselected rows
         if not sel:
             draw.line([36, y + ROW_H - 2, W - 36, y + ROW_H - 2],
                       fill=200, width=1)
@@ -362,7 +361,7 @@ def render_home(selected_index=0, battery_pct=75):
     # ── About — bottom ─────────────────────────────────
     about_sel = (selected_index == len(books))
 
-    # Decorative rule above About — same style as header
+    # Decorative rule above About
     draw.line([36, H - 54, W - 36, H - 54], fill=0, width=1)
     draw.ellipse([32, H - 58, 40, H - 50], fill=0)
     draw.ellipse([W - 40, H - 58, W - 32, H - 50], fill=0)
@@ -398,7 +397,7 @@ def render_about():
     # ── Header ─────────────────────────────────────────
     draw.text((36, 24), 'ABOUT', font=FONT_TOPBAR, fill=0)
 
-    # Decorative rule — same style as home screen
+    # Decorative rule
     draw.line([36, 58, W - 36, 58], fill=0, width=1)
     draw.ellipse([32, 54, 40, 62], fill=0)
     draw.ellipse([W - 40, 54, W - 32, 62], fill=0)
@@ -406,7 +405,7 @@ def render_about():
     # ── Controls section ───────────────────────────────
     y = 78
 
-    # Section label — rounded pill
+    # Section label 
     draw.rounded_rectangle([36, y, 140, y + 24], radius=12, fill=0)
     draw.text((88, y + 6), 'Controls', font=FONT_UI_BOLD,
               fill=255, anchor='mt')
@@ -458,7 +457,7 @@ def render_about():
         draw.text((36, y), line, font=FONT_UI, fill=0)
         y += 26
 
-    # ── IP address — rounded box ────────────────────────
+    # ── IP address────────────────────────
     y += 8
     ip_text = 'http://192.168.1.33:5000'
     ip_w    = draw.textlength(ip_text, font=FONT_UI_BOLD)
