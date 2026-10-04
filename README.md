@@ -1,6 +1,6 @@
 # E-Reader
 
-A custom e-reader built with a Raspberry Pi Zero 2W and Waveshare 5.83" e-ink display. The goal was to design something from scratch that worked similarly to a commercial ereader with the advantage of full control and flexibility. I wanted a device where i could upload epub files and a screensaver image remotely onto a server via WiFi connection.
+A custom e-reader built with a Raspberry Pi Zero 2W and Waveshare 5.83" e-ink display. The goal was to design something from scratch that worked similarly to a commercial ereader with the advantage of full control and flexibility. I wanted to build a device where i could upload epub files and a screensaver image remotely onto a server via WiFi connection.
 
 ---
 
